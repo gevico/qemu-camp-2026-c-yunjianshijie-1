@@ -21,7 +21,7 @@ int main() {
 
     // TODO: 在这里添加你的代码
     // I AM NOT DONE
-    
+    //
     printf("最后剩下的人是: %d\n", q.data[q.head].id);
 
     return 0;
