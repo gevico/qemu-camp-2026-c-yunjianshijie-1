@@ -54,8 +54,6 @@ int dfs(int x, int y)
 
 int main(void)
 {
-	// TODO: 在这里添加你的代码
-    // I AM NOT DONE
 	if(dfs(0, 0)){
 		 for (int i = 0; i < MAX_ROW; i++) {
             for (int j = 0; j < MAX_COL; j++) {
