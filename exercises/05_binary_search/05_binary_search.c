@@ -15,8 +15,6 @@ Student students[MAX_STUDENTS];
 int n;
 
 int binary_search(const char *target_name) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
     // 二分法
     int left = 0;
     int right = n - 1;
