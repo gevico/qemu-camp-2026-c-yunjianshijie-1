@@ -64,8 +64,7 @@ void hash_table_insert(HashTable *ht, const char *word) {
 
 // 从哈希表中获取所有单词及其计数
 void get_all_words(HashTable *ht, HashNode **nodes, int *count) {
-    *count = 0;  // 初始计数为0
-
+    *count = 0; 
     // 遍历哈希表每个位置
     for (int i = 0; i < ht->size; i++) {
         HashNode *p = ht->table[i];
