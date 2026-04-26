@@ -1,7 +1,7 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #define TABLE_SIZE 1024  // 哈希表大小
 
@@ -20,7 +20,7 @@ typedef struct {
 
 // djb2哈希函数
 unsigned long djb2_hash(const char *str) {
-    unsigned long hash = 5381; 
+    unsigned long hash = 5381;
     int c;
     while ((c = *str++)) {
         // 公式：hash = hash * 33 + c
@@ -53,7 +53,10 @@ void hash_table_insert(HashTable *ht, const char *word) {
 
     // 创建新节点
     HashNode *new_node = malloc(sizeof(HashNode));
-    new_node->word = strdup(word);
+    new_node->word = malloc(strlen(word) + 1);
+    if (new_node->word) {
+        strcpy(new_node->word, word);
+    }
     new_node->count = 1;
     new_node->next = ht->table[hash];
     ht->table[hash] = new_node;
@@ -79,7 +82,7 @@ void get_all_words(HashTable *ht, HashNode **nodes, int *count) {
 int compare_nodes(const void *a, const void *b) {
     HashNode *node_a = *(HashNode **)a;
     HashNode *node_b = *(HashNode **)b;
-    
+
     // 先按计数降序，再按字母升序
     if (node_b->count != node_a->count) {
         return node_b->count - node_a->count;  // 计数降序
@@ -110,32 +113,27 @@ char *get_next_word(const char **text) {
     while (*start != '\0' && !isalpha((unsigned char)*start)) {
         start++;
     }
-    // 如果已经到字符串末尾
     if (*start == '\0') {
         *text = start;
         return NULL;
     }
 
-    // 2. 找到单词的结束位置（连续字母）
     const char *end = start;
     while (*end != '\0' && isalpha((unsigned char)*end)) {
         end++;
     }
-
-    // 3. 分配内存，复制单词
     int len = end - start;
     char *word = (char *)malloc(len + 1);
     strncpy(word, start, len);
     word[len] = '\0';
 
-    // 4. 更新 text 指针，下次从这里继续读
     *text = end;
 
     return word;
 }
 
 int main(int argc, char *argv[]) {
-    const char* file_path = "paper.txt";
+    const char *file_path = "paper.txt";
 
     FILE *file = fopen(file_path, "r");
     if (file == NULL) {
@@ -145,30 +143,30 @@ int main(int argc, char *argv[]) {
 
     HashTable *ht = create_hash_table(TABLE_SIZE);
     char buffer[4096];
-    
+
     printf("正在读取文件: %s\n", file_path);
-    
+
     // 从文件读取直到EOF
     while (fgets(buffer, sizeof(buffer), file) != NULL) {
         const char *ptr = buffer;
         char *word;
-        
+
         while ((word = get_next_word(&ptr)) != NULL) {
             hash_table_insert(ht, word);
             free(word);
         }
     }
-    
+
     fclose(file);
-    
+
     // 收集所有单词节点
     HashNode **nodes = malloc(TABLE_SIZE * sizeof(HashNode *));
     int node_count = 0;
     get_all_words(ht, nodes, &node_count);
-    
+
     // 排序
     qsort(nodes, node_count, sizeof(HashNode *), compare_nodes);
-    
+
     // 输出结果
     printf("\n单词统计结果（按频率降序排列）:\n");
     printf("%-20s %s\n", "单词", "出现次数");
@@ -176,10 +174,10 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < node_count; i++) {
         printf("%s:%d\n", nodes[i]->word, nodes[i]->count);
     }
-    
+
     // 释放内存
     free(nodes);
     free_hash_table(ht);
-    
+
     return 0;
 }
