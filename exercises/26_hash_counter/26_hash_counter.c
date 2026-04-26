@@ -20,10 +20,15 @@ typedef struct {
 
 // djb2哈希函数
 unsigned long djb2_hash(const char *str) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
-}
+    unsigned long hash = 5381; 
+    int c;
+    while ((c = *str++)) {
+        // 公式：hash = hash * 33 + c
+        hash = ((hash << 5) + hash) + c;
+    }
 
+    return hash;
+}
 // 创建哈希表
 HashTable *create_hash_table(int size) {
     HashTable *ht = malloc(sizeof(HashTable));
@@ -36,14 +41,38 @@ HashTable *create_hash_table(int size) {
 void hash_table_insert(HashTable *ht, const char *word) {
     unsigned long hash = djb2_hash(word) % ht->size;
 
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    // 是否已经存在该单词
+    HashNode *node = ht->table[hash];
+    while (node != NULL) {
+        if (strcmp(node->word, word) == 0) {
+            node->count++;
+            return;
+        }
+        node = node->next;
+    }
+
+    // 创建新节点
+    HashNode *new_node = malloc(sizeof(HashNode));
+    new_node->word = strdup(word);
+    new_node->count = 1;
+    new_node->next = ht->table[hash];
+    ht->table[hash] = new_node;
 }
 
 // 从哈希表中获取所有单词及其计数
 void get_all_words(HashTable *ht, HashNode **nodes, int *count) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    *count = 0;  // 初始计数为0
+
+    // 遍历哈希表每个位置
+    for (int i = 0; i < ht->size; i++) {
+        HashNode *p = ht->table[i];
+        // 遍历每个链表
+        while (p != NULL) {
+            nodes[*count] = p;
+            (*count)++;
+            p = p->next;
+        }
+    }
 }
 
 // 比较函数用于排序
@@ -52,8 +81,10 @@ int compare_nodes(const void *a, const void *b) {
     HashNode *node_b = *(HashNode **)b;
     
     // 先按计数降序，再按字母升序
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    if (node_b->count != node_a->count) {
+        return node_b->count - node_a->count;  // 计数降序
+    }
+    return strcmp(node_a->word, node_b->word);  // 字母升序
 }
 
 // 释放哈希表内存
@@ -73,8 +104,34 @@ void free_hash_table(HashTable *ht) {
 
 // 从字符串中获取下一个单词
 char *get_next_word(const char **text) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
+    const char *start = *text;
+
+    // 跳过所有非字母
+    while (*start != '\0' && !isalpha((unsigned char)*start)) {
+        start++;
+    }
+    // 如果已经到字符串末尾
+    if (*start == '\0') {
+        *text = start;
+        return NULL;
+    }
+
+    // 2. 找到单词的结束位置（连续字母）
+    const char *end = start;
+    while (*end != '\0' && isalpha((unsigned char)*end)) {
+        end++;
+    }
+
+    // 3. 分配内存，复制单词
+    int len = end - start;
+    char *word = (char *)malloc(len + 1);
+    strncpy(word, start, len);
+    word[len] = '\0';
+
+    // 4. 更新 text 指针，下次从这里继续读
+    *text = end;
+
+    return word;
 }
 
 int main(int argc, char *argv[]) {
