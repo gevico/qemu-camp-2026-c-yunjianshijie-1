@@ -13,9 +13,6 @@ typedef struct {
 Student students[MAX_STUDENTS];
 int n;
 int linear_search(const char *target_name) {
-    // TODO: 在这里添加你的代码
-    // I AM NOT DONE
-    
     for(int i =0; i< n ;i++){
         if(!strcmp(target_name ,students[i].name)){
             return i;
